@@ -5,9 +5,13 @@
   "main": "src/BatchCommentAddin.xlam",
   "scripts": {
     "build": "powershell -ExecutionPolicy Bypass -File src/Scripts/build.ps1",
+    "build:ci": "powershell -ExecutionPolicy Bypass -File src/Scripts/build-ci.ps1",
     "package": "powershell -ExecutionPolicy Bypass -File src/Scripts/package.ps1",
     "test": "powershell -ExecutionPolicy Bypass -File tests/run-tests.ps1",
-    "clean": "powershell -ExecutionPolicy Bypass -Command \"Remove-Item -Path 'dist' -Recurse -Force -ErrorAction SilentlyContinue\""
+    "test:ci": "powershell -ExecutionPolicy Bypass -File tests/run-tests.ps1",
+    "clean": "powershell -ExecutionPolicy Bypass -Command \"Remove-Item -Path 'dist' -Recurse -Force -ErrorAction SilentlyContinue\"",
+    "install": "powershell -ExecutionPolicy Bypass -File src/Scripts/install.ps1",
+    "release": "npm run build:ci && npm run package"
   },
   "repository": {
     "type": "git",
