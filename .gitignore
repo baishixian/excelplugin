@@ -1,0 +1,51 @@
+# Build outputs
+dist/
+bin/
+obj/
+*.xlam
+*.exe
+*.msi
+*.zip
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.temp
+
+# Log files
+*.log
+logs/
+
+# User settings
+*.user
+*.suo
+*.userprefs
+
+# Visual Studio
+.vs/
+*.vcxproj.user
+
+# Office temp files
+~$*
+*.xlsm~
+
+# Test results
+tests/results/
+TestResults/
+
+# Package files
+packages/
+node_modules/
+
+# Environment files
+.env
+.env.local
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

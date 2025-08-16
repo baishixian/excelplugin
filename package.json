@@ -1,0 +1,35 @@
+{
+  "name": "batch-comment-addin",
+  "version": "1.0.0",
+  "description": "Professional Excel batch comment add-in",
+  "main": "src/BatchCommentAddin.xlam",
+  "scripts": {
+    "build": "powershell -ExecutionPolicy Bypass -File src/Scripts/build.ps1",
+    "package": "powershell -ExecutionPolicy Bypass -File src/Scripts/package.ps1",
+    "test": "powershell -ExecutionPolicy Bypass -File tests/run-tests.ps1",
+    "clean": "powershell -ExecutionPolicy Bypass -Command \"Remove-Item -Path 'dist' -Recurse -Force -ErrorAction SilentlyContinue\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/BatchCommentAddin.git"
+  },
+  "keywords": [
+    "excel",
+    "addin",
+    "comment",
+    "batch",
+    "vba",
+    "office"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/BatchCommentAddin/issues"
+  },
+  "homepage": "https://github.com/yourusername/BatchCommentAddin#readme",
+  "devDependencies": {
+    "office-addin-dev-certs": "^1.11.3",
+    "office-addin-debugging": "^5.0.10",
+    "office-addin-lint": "^2.2.5"
+  }
+}

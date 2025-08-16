@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Get version from tag
+      id: get_version
+      run: |
+        $version = $env:GITHUB_REF -replace 'refs/tags/v', ''
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+        echo "Version: $version"
+      shell: powershell
+      
+    - name: Setup PowerShell
+      uses: azure/powershell@v1
+      with:
+        inlineScript: |
+          Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+        azPSVersion: 'latest'
+        
+    - name: Install Office Developer Tools
+      run: |
+        choco install visualstudio2022-workload-office --yes
+        
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.3
+      
+    - name: Build Release Version
+      run: |
+        powershell -ExecutionPolicy Bypass -File "src/Scripts/build.ps1" -Version "${{ steps.get_version.outputs.VERSION }}" -Configuration "Release"
+        
+    - name: Create Installer
+      run: |
+        powershell -ExecutionPolicy Bypass -File "src/Scripts/create-installer.ps1" -Version "${{ steps.get_version.outputs.VERSION }}"
+        
+    - name: Sign Files
+      if: env.SIGN_CERTIFICATE != ''
+      run: |
+        powershell -ExecutionPolicy Bypass -File "src/Scripts/sign-files.ps1"
+      env:
+        SIGN_CERTIFICATE: ${{ secrets.SIGN_CERTIFICATE }}
+        SIGN_PASSWORD: ${{ secrets.SIGN_PASSWORD }}
+        
+    - name: Create Release Notes
+      id: release_notes
+      run: |
+        $notes = Get-Content "CHANGELOG.md" | Select-String -Pattern "## \[${{ steps.get_version.outputs.VERSION }}\]" -A 20 | Select-Object -Skip 1
+        $notes = $notes -join "`n"
+        echo "NOTES<<EOF" >> $env:GITHUB_OUTPUT
+        echo $notes >> $env:GITHUB_OUTPUT
+        echo "EOF" >> $env:GITHUB_OUTPUT
+      shell: powershell
+      
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.ref }}
+        name: Release ${{ steps.get_version.outputs.VERSION }}
+        body: ${{ steps.release_notes.outputs.NOTES }}
+        draft: false
+        prerelease: false
+        files: |
+          dist/BatchCommentAddin-${{ steps.get_version.outputs.VERSION }}.xlam
+          dist/BatchCommentAddin-Setup-${{ steps.get_version.outputs.VERSION }}.exe
+          dist/BatchCommentAddin-${{ steps.get_version.outputs.VERSION }}.msi
+          dist/BatchCommentAddin-${{ steps.get_version.outputs.VERSION }}.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Update Release Statistics
+      run: |
+        powershell -ExecutionPolicy Bypass -File "src/Scripts/update-stats.ps1" -Version "${{ steps.get_version.outputs.VERSION }}"

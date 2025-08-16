@@ -1,0 +1,62 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup PowerShell
+      uses: azure/powershell@v1
+      with:
+        inlineScript: |
+          Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+        azPSVersion: 'latest'
+        
+    - name: Install Office Developer Tools
+      run: |
+        choco install visualstudio2022-workload-office --yes
+        
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.3
+      
+    - name: Restore NuGet packages
+      run: nuget restore
+      
+    - name: Build VBA Project
+      run: |
+        powershell -ExecutionPolicy Bypass -File "src/Scripts/build.ps1"
+        
+    - name: Run Tests
+      run: |
+        powershell -ExecutionPolicy Bypass -File "tests/run-tests.ps1"
+        
+    - name: Package Addin
+      run: |
+        powershell -ExecutionPolicy Bypass -File "src/Scripts/package.ps1"
+        
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: BatchCommentAddin-${{ github.sha }}
+        path: |
+          dist/*.xlam
+          dist/*.exe
+          dist/*.msi
+        retention-days: 30
+        
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ github.sha }}
+        path: tests/results/
+        retention-days: 7
