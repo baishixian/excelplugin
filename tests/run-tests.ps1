@@ -38,16 +38,16 @@ if ($unitTests) {
             $testResult.Duration = ($endTime - $startTime).TotalSeconds
             $testResult.Status = "Passed"
             $passedTests++
-            Write-Host "✓ PASSED ($($testResult.Duration.ToString("F2"))s)" -ForegroundColor Green
+            Write-Host "[PASS] PASSED ($($testResult.Duration.ToString("F2"))s)" -ForegroundColor Green
         } catch {
             $endTime = Get-Date
             $testResult.Duration = ($endTime - $startTime).TotalSeconds
             $testResult.Status = "Failed"
             $testResult.Error = $_.Exception.Message
             $failedTests++
-            Write-Host "✗ FAILED: $($_.Exception.Message)" -ForegroundColor Red
+            Write-Host "[FAIL] FAILED: $($_.Exception.Message)" -ForegroundColor Red
         }
-        
+
         $testResults += $testResult
         $totalTests++
     }
@@ -63,7 +63,7 @@ $integrationTests = Get-ChildItem $integrationTestPath -Filter "*.ps1" -ErrorAct
 if ($integrationTests) {
     foreach ($test in $integrationTests) {
         Write-Host "Running $($test.Name)..." -ForegroundColor Cyan
-        
+
         $testResult = @{
             Name = $test.Name
             Status = "Unknown"
@@ -71,7 +71,7 @@ if ($integrationTests) {
             Error = $null
             StartTime = Get-Date
         }
-        
+
         try {
             $startTime = Get-Date
             & $test.FullName
@@ -79,14 +79,14 @@ if ($integrationTests) {
             $testResult.Duration = ($endTime - $startTime).TotalSeconds
             $testResult.Status = "Passed"
             $passedTests++
-            Write-Host "✓ PASSED ($($testResult.Duration.ToString("F2"))s)" -ForegroundColor Green
+            Write-Host "[PASS] PASSED ($($testResult.Duration.ToString("F2"))s)" -ForegroundColor Green
         } catch {
             $endTime = Get-Date
             $testResult.Duration = ($endTime - $startTime).TotalSeconds
             $testResult.Status = "Failed"
             $testResult.Error = $_.Exception.Message
             $failedTests++
-            Write-Host "✗ FAILED: $($_.Exception.Message)" -ForegroundColor Red
+            Write-Host "[FAIL] FAILED: $($_.Exception.Message)" -ForegroundColor Red
         }
         
         $testResults += $testResult
